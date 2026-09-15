@@ -27,7 +27,7 @@ export default function PremiumNotes() {
       background: `linear-gradient(rgba(0, 0, 0, 0.8), rgba(0, 0, 0, 0.85)), url(${BlueNetworkBG})`,
       backgroundSize: 'cover',
       backgroundPosition: 'center',
-      backgroundAttachment: 'fixed',
+      scrollBehavior: 'smooth',
       color: '#fff',
       padding: '40px',
       position: 'relative',

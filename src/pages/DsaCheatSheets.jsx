@@ -1,67 +1,64 @@
 import React, { useEffect } from 'react';
-import { Typography, Row, Col, Button, Card } from 'antd';
+import { Typography, Row, Col, Button } from 'antd';
 import { 
-  ArrowLeftOutlined, 
-  BookOutlined, 
-  CodeOutlined, 
   ThunderboltOutlined,
-  DashboardOutlined,
-  SettingOutlined,
-  EyeOutlined,
-  AppstoreOutlined
+  BookOutlined,
+  CodeOutlined,
+  GlobalOutlined,
+  StarOutlined
 } from '@ant-design/icons';
 import { useNavigate } from 'react-router-dom';
 import Logo from '../components/Logo';
-import HandpickedNotesBG from '../assets/handpicked_notes_bg.png';
+import HandpickedNotesBG from '../assets/handpicked_notes_bg.png'; // Reusing theme background
 
 const { Title, Text } = Typography;
 
-const RESOURCE_CARDS = [
+const CHEAT_SHEETS = [
   {
-    title: 'DSA Cheat Sheets',
-    description: 'Quick algorithm and data structure reference guides.',
-    icon: <BookOutlined style={{ fontSize: '32px', color: '#bc13fe' }} />,
-    color: '#bc13fe',
-    path: '/dsa-cheat-sheets'
+    title: 'Big-O Cheat Sheet',
+    description: 'The definitive guide to time and space complexity for data structures and sorting algorithms.',
+    icon: <ThunderboltOutlined style={{ fontSize: '32px', color: '#00f2ff' }} />,
+    url: 'https://www.bigocheatsheet.com/',
+    color: '#00f2ff'
   },
   {
-    title: 'Coding Practice Platforms',
-    description: 'Direct links to popular competitive programming websites.',
+    title: 'NeetCode Roadmap',
+    description: 'Structured algorithms and data structures roadmap and cheat sheets by NeetCode.',
     icon: <CodeOutlined style={{ fontSize: '32px', color: '#bc13fe' }} />,
-    color: '#bc13fe',
-    path: '/practice-platforms'
+    url: 'https://neetcode.io/roadmap',
+    color: '#bc13fe'
   },
   {
-    title: 'Interview Preparation Guides',
-    description: 'Resources for coding interviews and problem solving.',
-    icon: <ThunderboltOutlined style={{ fontSize: '32px', color: '#bc13fe' }} />,
-    color: '#bc13fe',
-    path: '/interview-guides'
+    title: 'Tech Interview Handbook',
+    description: 'Comprehensive algorithm study cheat sheets for technical interviews.',
+    icon: <BookOutlined style={{ fontSize: '32px', color: '#ffcc00' }} />,
+    url: 'https://www.techinterviewhandbook.org/algorithms/study-cheatsheet/',
+    color: '#ffcc00'
   },
   {
-    title: 'Algorithm Visualizers',
-    description: 'Interactive tools to visualize algorithms and data structures.',
-    icon: <EyeOutlined style={{ fontSize: '32px', color: '#bc13fe' }} />,
-    color: '#bc13fe',
-    path: '/algorithm-visualizers'
+    title: 'GeeksforGeeks DSA',
+    description: 'In-depth reference for all data structures and algorithms, perfect for quick brush-ups.',
+    icon: <GlobalOutlined style={{ fontSize: '32px', color: '#00ff88' }} />,
+    url: 'https://www.geeksforgeeks.org/data-structures/',
+    color: '#00ff88'
   },
   {
-    title: 'System Design Resources',
-    description: 'Learn scalable architecture and system design basics.',
-    icon: <DashboardOutlined style={{ fontSize: '32px', color: '#bc13fe' }} />,
-    color: '#bc13fe',
-    path: '/system-design-resources'
+    title: 'JavaScript Algorithms',
+    description: 'Popular GitHub repository containing examples of many popular algorithms and data structures.',
+    icon: <StarOutlined style={{ fontSize: '32px', color: '#ff4d4f' }} />,
+    url: 'https://github.com/trekhleb/javascript-algorithms',
+    color: '#ff4d4f'
   },
   {
-    title: 'Developer Tools',
-    description: 'Useful compilers, debuggers, and coding utilities.',
-    icon: <AppstoreOutlined style={{ fontSize: '32px', color: '#bc13fe' }} />,
-    color: '#bc13fe',
-    path: '/developer-tools'
+    title: 'Blind 75 LeetCode',
+    description: 'The most famous curated list of 75 essential LeetCode questions.',
+    icon: <BookOutlined style={{ fontSize: '32px', color: '#00A4EF' }} />,
+    url: 'https://leetcode.com/discuss/general-discussion/460599/blind-75-leetcode-questions',
+    color: '#00A4EF'
   }
 ];
 
-export default function DirectResources() {
+export default function DsaCheatSheets() {
   const navigate = useNavigate();
 
   useEffect(() => {
@@ -109,11 +106,11 @@ export default function DirectResources() {
         
         <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-end', gap: '5px' }}>
           <Button type="text" style={{ color: '#fff', padding: '0 15px' }} onClick={() => navigate('/dashboard')}>Back to Dashboard</Button>
-          <Button type="text" style={{ color: '#fff', fontSize: '13px', padding: '0 15px' }} onClick={() => navigate('/premium-notes')}>Go Back</Button>
+          <Button type="text" style={{ color: '#fff', fontSize: '13px', padding: '0 15px' }} onClick={() => navigate('/direct-resources')}>Go Back</Button>
         </div>
       </div>
 
-      {/* Main Container with Green Glow Border */}
+      {/* Main Container */}
       <div style={{
         maxWidth: '1200px',
         margin: '0 auto',
@@ -135,25 +132,25 @@ export default function DirectResources() {
             WebkitTextFillColor: 'transparent',
             textShadow: '0 0 30px rgba(188, 19, 254, 0.5)'
           }}>
-            DIRECT LINKS ON HANDPICKED NOTES
+            DSA Cheat Sheets
           </Title>
           <Text style={{ 
             color: 'rgba(255,255,255,0.5)', 
             fontSize: '18px', 
             fontWeight: '500' 
           }}>
-            Quick access to essential coding tools, platforms, and developer resources.
+            Direct links to the best Data Structures and Algorithms cheat sheets online.
           </Text>
         </div>
 
-        {/* Resource Grid with balanced gutter */}
+        {/* Resource Grid */}
         <Row gutter={[32, 64]}>
-          {RESOURCE_CARDS.map((item, idx) => (
+          {CHEAT_SHEETS.map((item, idx) => (
             <Col xs={24} md={12} lg={8} key={idx}>
               <div style={{
                 background: 'rgba(255, 255, 255, 0.03)',
                 borderRadius: '24px',
-                border: '1px solid rgba(188, 19, 254, 0.15)',
+                border: `1px solid ${item.color}33`,
                 padding: '30px',
                 minHeight: '280px',
                 display: 'flex',
@@ -162,7 +159,7 @@ export default function DirectResources() {
                 textAlign: 'center',
                 transition: 'all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275)',
                 boxShadow: '0 4px 20px rgba(0, 0, 0, 0.4)'
-              }} className="resource-card">
+              }} className="cheat-sheet-card">
                 <div style={{ marginBottom: '20px' }}>
                   {item.icon}
                 </div>
@@ -175,24 +172,20 @@ export default function DirectResources() {
                 <Button 
                   type="primary" 
                   shape="round"
-                  onClick={() => {
-                    if (item.path) {
-                      navigate(item.path);
-                    }
-                  }}
+                  onClick={() => window.open(item.url, '_blank')}
                   style={{
-                  background: 'linear-gradient(90deg, #9b00e3, #d600d6)',
-                  border: 'none',
-                  height: '44px',
-                  padding: '0 40px',
-                  color: 'rgba(255, 255, 255, 0.9)',
-                  fontWeight: '900',
-                  fontSize: '14px',
-                  boxShadow: '0 0 10px rgba(188, 19, 254, 0.2)'
+                    background: `linear-gradient(90deg, ${item.color}aa, ${item.color})`,
+                    border: 'none',
+                    height: '44px',
+                    padding: '0 40px',
+                    color: '#fff',
+                    fontWeight: '900',
+                    fontSize: '14px',
+                    boxShadow: `0 0 10px ${item.color}44`
                   }}
                   className="open-resource-btn"
                 >
-                  Open Resource
+                  Visit Website
                 </Button>
               </div>
             </Col>
@@ -201,16 +194,13 @@ export default function DirectResources() {
       </div>
 
       <style>{`
-        .resource-card:hover {
+        .cheat-sheet-card:hover {
           transform: translateY(-12px) scale(1.02);
-          border-color: rgba(188, 19, 254, 0.6) !important;
-          box-shadow: 0 15px 40px rgba(188, 19, 254, 0.3) !important;
-          background: rgba(188, 19, 254, 0.08) !important;
+          background: rgba(255, 255, 255, 0.08) !important;
         }
         .open-resource-btn:hover {
           transform: scale(1.05);
           filter: brightness(1.2);
-          box-shadow: 0 0 25px rgba(255, 0, 255, 0.6);
         }
       `}</style>
     </div>

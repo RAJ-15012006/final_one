@@ -130,7 +130,7 @@ export default function GamingArena({ settings, onFinish }) {
       <div style={{
         position: 'absolute',
         top: 0, left: 0, right: 0, bottom: 0,
-        backgroundImage: 'linear-gradient(rgba(0, 242, 255, 0.05) 1px, transparent 1px), linear-gradient(90deg, rgba(0, 242, 255, 0.05) 1px, transparent 1px)',
+        backgroundImage: 'linear-gradient(rgba(0, 210, 255, 0.05) 1px, transparent 1px), linear-gradient(90deg, rgba(0, 210, 255, 0.05) 1px, transparent 1px)',
         backgroundSize: '40px 40px',
         zIndex: 0
       }}></div>
@@ -149,41 +149,41 @@ export default function GamingArena({ settings, onFinish }) {
         {/* Timer */}
         <div style={{
           background: 'rgba(0,0,0,0.8)',
-          border: '2px solid #00f2ff',
+          border: '2px solid #00D2FF',
           padding: '8px 25px',
           borderRadius: '10px',
-          boxShadow: '0 0 30px rgba(0, 242, 255, 0.4)',
+          boxShadow: '0 0 30px rgba(0, 210, 255, 0.4)',
           textAlign: 'center',
           minWidth: '160px'
         }}>
           <Text style={{ 
-            color: '#00f2ff', 
+            color: '#00D2FF', 
             fontSize: '32px', 
             fontWeight: '900', 
             fontFamily: "'JetBrains Mono', monospace",
             display: 'block',
             lineHeight: '1',
-            textShadow: '0 0 10px #00f2ff'
+            textShadow: '0 0 10px #00D2FF'
           }}>
             {formatTime(timeLeft)}
           </Text>
-          <Text style={{ color: 'rgba(0, 242, 255, 0.5)', fontSize: '9px', fontWeight: 'bold', letterSpacing: '2px' }}>SYSTEM TIME</Text>
+          <Text style={{ color: 'rgba(0, 210, 255, 0.5)', fontSize: '9px', fontWeight: 'bold', letterSpacing: '2px' }}>SYSTEM TIME</Text>
         </div>
 
         {/* Room Code */}
         <div style={{
           background: 'rgba(0,0,0,0.9)',
-          border: '1px solid #bc13fe',
+          border: '1px solid #FF6B00',
           padding: '8px 20px',
           borderRadius: '10px',
-          boxShadow: '0 0 20px rgba(188, 19, 254, 0.3)',
+          boxShadow: '0 0 20px rgba(255, 107, 0, 0.3)',
           display: 'flex',
           flexDirection: 'column',
           alignItems: 'center',
           minWidth: '160px'
         }}>
-          <Text style={{ color: 'rgba(188, 19, 254, 0.5)', fontSize: '8px', fontWeight: 'bold', letterSpacing: '2px' }}>SECURE ROOM CODE</Text>
-          <Text style={{ color: '#bc13fe', fontSize: '18px', fontWeight: '900', letterSpacing: '3px' }}>{settings.roomCode}</Text>
+          <Text style={{ color: 'rgba(255, 107, 0, 0.5)', fontSize: '8px', fontWeight: 'bold', letterSpacing: '2px' }}>SECURE ROOM CODE</Text>
+          <Text style={{ color: '#FF6B00', fontSize: '18px', fontWeight: '900', letterSpacing: '3px' }}>{settings.roomCode}</Text>
         </div>
       </div>
 
@@ -192,7 +192,7 @@ export default function GamingArena({ settings, onFinish }) {
          <div style={{ background: 'rgba(255,255,255,0.02)', padding: '15px 25px', borderRadius: '12px', border: '1px solid rgba(255,255,255,0.1)' }}>
             <Space direction="vertical" size={12} style={{ width: '100%' }}>
                 <Space size={20}>
-                    <Tag color="cyan" style={{ fontSize: '14px', padding: '4px 12px' }}>{settings.topic}</Tag>
+                    <Tag color="blue" style={{ fontSize: '14px', padding: '4px 12px' }}>{settings.topic}</Tag>
                     <Title level={4} style={{ margin: 0, color: '#fff', letterSpacing: '1px' }}>MISSION: {question.title}</Title>
                 </Space>
                 <div 
@@ -217,8 +217,8 @@ export default function GamingArena({ settings, onFinish }) {
           <Col key={player.id} span={getColSpan()} style={{ height: '100%' }}>
             <div style={{
               height: '100%',
-              background: 'rgba(0,0,0,0.6)',
-              border: `2px solid ${player.isUser ? '#00f2ff' : 'rgba(188, 19, 254, 0.3)'}`,
+              background: 'rgba(0,0,0,0.8)',
+              border: `2px solid ${player.isUser ? '#00D2FF' : 'rgba(255, 107, 0, 0.3)'}`,
               borderRadius: '16px',
               display: 'flex',
               flexDirection: 'column',
@@ -229,18 +229,18 @@ export default function GamingArena({ settings, onFinish }) {
               {/* Player Header */}
               <div style={{ 
                 padding: '12px 20px', 
-                background: player.isUser ? 'rgba(0, 242, 255, 0.1)' : 'rgba(188, 19, 254, 0.05)',
-                borderBottom: `1px solid ${player.isUser ? '#00f2ff' : 'rgba(188, 19, 254, 0.3)'}`,
+                background: player.isUser ? 'rgba(0, 210, 255, 0.1)' : 'rgba(255, 107, 0, 0.05)',
+                borderBottom: `1px solid ${player.isUser ? '#00D2FF' : 'rgba(255, 107, 0, 0.3)'}`,
                 display: 'flex',
                 justifyContent: 'space-between',
                 alignItems: 'center'
               }}>
                 <Space>
-                  <UserOutlined style={{ color: player.isUser ? '#00f2ff' : '#bc13fe' }} />
+                  <UserOutlined style={{ color: player.isUser ? '#00D2FF' : '#FF6B00' }} />
                   <Text style={{ color: '#fff', fontWeight: 'bold' }}>{player.name}</Text>
-                  {player.isUser && <Tag color="cyan" size="small">YOU</Tag>}
+                  {player.isUser && <Tag color="orange" size="small">YOU</Tag>}
                 </Space>
-                <div style={{ width: '8px', height: '8px', borderRadius: '50%', background: player.isUser ? '#00ff88' : '#333', boxShadow: player.isUser ? '0 0 10px #00ff88' : 'none' }}></div>
+                <div style={{ width: '8px', height: '8px', borderRadius: '50%', background: player.isUser ? '#FF6B00' : '#333', boxShadow: player.isUser ? '0 0 10px #FF6B00' : 'none' }}></div>
               </div>
 
               {/* Editor Area */}
@@ -260,7 +260,7 @@ export default function GamingArena({ settings, onFinish }) {
                       height: '100%',
                       background: 'transparent',
                       border: 'none',
-                      color: '#00f2ff',
+                      color: '#00D2FF',
                       fontFamily: "'JetBrains Mono', monospace",
                       fontSize: '12px',
                       lineHeight: '20px',
@@ -320,8 +320,8 @@ export default function GamingArena({ settings, onFinish }) {
                     style={{
                         flex: 1,
                         background: 'rgba(255,255,255,0.05)',
-                        borderColor: 'rgba(0, 242, 255, 0.3)',
-                        color: '#00f2ff',
+                        borderColor: 'rgba(0, 210, 255, 0.3)',
+                        color: '#00D2FF',
                         fontWeight: 'bold',
                         height: '40px'
                     }}
@@ -336,9 +336,9 @@ export default function GamingArena({ settings, onFinish }) {
                   onClick={() => handleValidation(userCode)}
                   style={{
                     flex: 2,
-                    background: player.isUser ? '#00f2ff' : 'transparent',
-                    borderColor: player.isUser ? '#00f2ff' : 'rgba(255,255,255,0.1)',
-                    color: player.isUser ? '#000' : 'rgba(255,255,255,0.2)',
+                    background: player.isUser ? '#FF6B00' : 'transparent',
+                    borderColor: player.isUser ? '#FF6B00' : 'rgba(255,255,255,0.1)',
+                    color: player.isUser ? '#fff' : 'rgba(255,255,255,0.2)',
                     fontWeight: '900',
                     height: '40px'
                   }}
@@ -352,7 +352,7 @@ export default function GamingArena({ settings, onFinish }) {
                 <div style={{
                   position: 'absolute',
                   top: 0, left: 0, right: 0, height: '2px',
-                  background: 'rgba(188, 19, 254, 0.2)',
+                  background: 'rgba(255, 107, 0, 0.2)',
                   animation: 'scan 4s linear infinite',
                   zIndex: 2,
                   pointerEvents: 'none'
@@ -374,7 +374,7 @@ export default function GamingArena({ settings, onFinish }) {
           font-family: 'JetBrains Mono', monospace;
         }
         .custom-scrollbar::-webkit-scrollbar { width: 4px; }
-        .custom-scrollbar::-webkit-scrollbar-thumb { background: rgba(0, 242, 255, 0.2); border-radius: 10px; }
+        .custom-scrollbar::-webkit-scrollbar-thumb { background: rgba(0, 210, 255, 0.2); border-radius: 10px; }
         
         @keyframes shake {
           0%, 100% { transform: translateX(0); }

@@ -24,7 +24,8 @@ const COMPANY_DATA = [
     color: '#ff9900',
     patterns: ['Dynamic Programming', 'Trees', 'Graph Algorithms', 'Linked Lists'],
     difficulty: 'Medium-Hard',
-    difficultyColor: '#ffcc00'
+    difficultyColor: '#ffcc00',
+    path: '/company/amazon'
   },
   {
     name: 'Google',
@@ -32,7 +33,8 @@ const COMPANY_DATA = [
     color: '#4285F4',
     patterns: ['Array & String', 'Graph Traversal', 'Binary Search', 'Trees & Heaps'],
     difficulty: 'Hard',
-    difficultyColor: '#ff4d4f'
+    difficultyColor: '#ff4d4f',
+    path: '/company/google'
   },
   {
     name: 'Meta',
@@ -40,7 +42,8 @@ const COMPANY_DATA = [
     color: '#0668E1',
     patterns: ['Matrix', 'Backtracking', 'Trees', 'Dynamic Programming'],
     difficulty: 'Medium-Hard',
-    difficultyColor: '#ffcc00'
+    difficultyColor: '#ffcc00',
+    path: '/company/meta'
   },
   {
     name: 'Microsoft',
@@ -48,7 +51,8 @@ const COMPANY_DATA = [
     color: '#00A4EF',
     patterns: ['Linked Lists', 'Tries', 'Sorting & Searching', 'Greedy Algorithms'],
     difficulty: 'Medium',
-    difficultyColor: '#00ff88'
+    difficultyColor: '#00ff88',
+    path: '/company/microsoft'
   },
   {
     name: 'Apple',
@@ -56,7 +60,8 @@ const COMPANY_DATA = [
     color: '#A2AAAD',
     patterns: ['Sliding Window', 'Two Pointers', 'Stacks & Queues', 'Trees'],
     difficulty: 'Medium-Hard',
-    difficultyColor: '#ffcc00'
+    difficultyColor: '#ffcc00',
+    path: '/company/apple'
   },
   {
     name: 'Netflix',
@@ -64,7 +69,8 @@ const COMPANY_DATA = [
     color: '#E50914',
     patterns: ['Dynamic Programming', 'Graph Traversal', 'Trees', 'Arrays & Hashing'],
     difficulty: 'Hard',
-    difficultyColor: '#ff4d4f'
+    difficultyColor: '#ff4d4f',
+    path: '/company/netflix'
   }
 ];
 
@@ -80,7 +86,7 @@ export default function CompanyPatterns() {
       background: `linear-gradient(rgba(0, 0, 0, 0.85), rgba(0, 0, 0, 0.9)), url(${PremiumNotesBG})`,
       backgroundSize: 'cover',
       backgroundPosition: 'center',
-      backgroundAttachment: 'fixed',
+      scrollBehavior: 'smooth',
       color: '#fff',
       padding: '60px 20px',
       position: 'relative',
@@ -279,6 +285,7 @@ export default function CompanyPatterns() {
                       block 
                       icon={<UnlockOutlined />}
                       className="unlock-btn"
+                      onClick={() => navigate(company.path)}
                       style={{ 
                         height: '52px',
                         borderRadius: '18px',

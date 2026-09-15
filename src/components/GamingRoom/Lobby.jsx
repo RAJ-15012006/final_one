@@ -47,10 +47,10 @@ export default function Lobby({ onStart, settings, setSettings, onBack }) {
           top: '20px', 
           right: '20px', 
           zIndex: 10,
-          color: 'rgba(0, 242, 255, 0.7)',
-          border: '1px solid rgba(0, 242, 255, 0.3)',
+          color: 'rgba(0, 210, 255, 0.7)',
+          border: '1px solid rgba(0, 210, 255, 0.3)',
           borderRadius: '4px',
-          background: 'rgba(0, 242, 255, 0.05)',
+          background: 'rgba(0, 210, 255, 0.05)',
           display: 'flex',
           alignItems: 'center',
           gap: '8px',
@@ -71,8 +71,8 @@ export default function Lobby({ onStart, settings, setSettings, onBack }) {
         <div style={{ display: 'flex', alignItems: 'center', gap: '20px' }}>
           <div className="status-orb"></div>
           <div>
-            <Title level={4} style={{ color: '#00f2ff', margin: 0, letterSpacing: '2px', fontWeight: '900' }}>MISSION CONTROL v4.0</Title>
-            <Text style={{ color: 'rgba(0, 242, 255, 0.5)', fontSize: '10px', textTransform: 'uppercase' }}>Secure encrypted connection... ACTIVE</Text>
+            <Title level={4} style={{ color: '#00D2FF', margin: 0, letterSpacing: '2px', fontWeight: '900' }}>MISSION CONTROL v4.0</Title>
+            <Text style={{ color: 'rgba(0, 210, 255, 0.5)', fontSize: '10px', textTransform: 'uppercase' }}>Secure encrypted connection... ACTIVE</Text>
           </div>
         </div>
       </div>
@@ -90,7 +90,7 @@ export default function Lobby({ onStart, settings, setSettings, onBack }) {
                         <div 
                             key={t}
                             onClick={() => { setSettings({ ...settings, time: t }); updateLog(`Time adjusted to ${t}m`); }}
-                            className={`power-cell ${settings.time === t ? 'active-cyan' : ''}`}
+                            className={`power-cell ${settings.time === t ? 'active-cobalt' : ''}`}
                         >
                             <span className="cell-val">{t}</span>
                             <div className="cell-bar"></div>
@@ -107,6 +107,11 @@ export default function Lobby({ onStart, settings, setSettings, onBack }) {
                             key={d}
                             onClick={() => { setSettings({ ...settings, difficulty: d }); updateLog(`Difficulty shifted to ${d}`); }}
                             className={`diff-node ${settings.difficulty === d ? 'selected' : ''}`}
+                            style={{ 
+                                borderColor: settings.difficulty === d ? '#FF6B00' : 'rgba(255, 107, 0, 0.2)',
+                                color: settings.difficulty === d ? '#fff' : 'rgba(255, 107, 0, 0.5)',
+                                background: settings.difficulty === d ? '#FF6B00' : 'transparent'
+                            }}
                         >
                             {d.toUpperCase()}
                         </div>
@@ -121,7 +126,7 @@ export default function Lobby({ onStart, settings, setSettings, onBack }) {
                         <div 
                             key={p}
                             onClick={() => { setSettings({ ...settings, players: p }); updateLog(`Player slots: ${p}`); }}
-                            className={`slot-hex ${settings.players === p ? 'active-purple' : ''}`}
+                            className={`slot-hex ${settings.players === p ? 'active-orange' : ''}`}
                         >
                             <Title level={3} style={{ color: 'inherit', margin: 0 }}>{p}</Title>
                             <Text style={{ fontSize: '8px', color: 'inherit' }}>UNITS</Text>
@@ -131,11 +136,11 @@ export default function Lobby({ onStart, settings, setSettings, onBack }) {
             </div>
 
             {/* Simulated System Logs */}
-            <div className="system-logs">
-                <div className="log-header">COMMAND LOGS</div>
+            <div className="system-logs" style={{ borderLeft: '2px solid #00D2FF' }}>
+                <div className="log-header" style={{ color: '#00D2FF' }}>COMMAND LOGS</div>
                 {logs.map((log, i) => (
                     <div key={i} className="log-entry" style={{ opacity: 1 - (i * 0.2) }}>
-                        <span className="log-time">[{new Date().toLocaleTimeString([], { hour12: false })}]</span> {log}
+                        <span className="log-time" style={{ color: 'rgba(0, 210, 255, 0.5)' }}>[{new Date().toLocaleTimeString([], { hour12: false })}]</span> {log}
                     </div>
                 ))}
             </div>
@@ -152,7 +157,7 @@ export default function Lobby({ onStart, settings, setSettings, onBack }) {
                         <div 
                             key={t}
                             onClick={() => setSettings({ ...settings, topic: t })}
-                            className={`matrix-item ${settings.topic === t ? 'targeted' : ''}`}
+                            className={`matrix-item ${settings.topic === t ? 'targeted-cobalt' : ''}`}
                         >
                             <div className="corner-tl"></div>
                             <div className="matrix-text">{t.toUpperCase()}</div>
@@ -164,9 +169,9 @@ export default function Lobby({ onStart, settings, setSettings, onBack }) {
 
             <div className="matrix-footer">
                 <div style={{ flex: 1 }}>
-                    <Text style={{ color: 'rgba(255,255,255,0.4)', fontSize: '10px' }}>Current Target: <span style={{ color: '#00ff88' }}>{settings.topic.toUpperCase()}</span></Text>
-                    <div style={{ height: '2px', background: 'rgba(0, 255, 136, 0.2)', width: '100%', marginTop: '5px' }}>
-                        <div style={{ height: '100%', width: '100%', background: '#00ff88', animation: 'progress 2s linear infinite' }}></div>
+                    <Text style={{ color: 'rgba(255,255,255,0.4)', fontSize: '10px' }}>Current Target: <span style={{ color: '#FF6B00' }}>{settings.topic.toUpperCase()}</span></Text>
+                    <div style={{ height: '2px', background: 'rgba(255, 107, 0, 0.2)', width: '100%', marginTop: '5px' }}>
+                        <div style={{ height: '100%', width: '100%', background: '#FF6B00', animation: 'progress 2s linear infinite' }}></div>
                     </div>
                 </div>
                 <div style={{ marginLeft: '40px' }}>
@@ -186,17 +191,17 @@ export default function Lobby({ onStart, settings, setSettings, onBack }) {
         .hud-frame {
             position: absolute;
             top: -20px; left: -20px; right: -20px; bottom: -20px;
-            border: 1px solid rgba(0, 242, 255, 0.1);
+            border: 1px solid rgba(255, 176, 0, 0.1);
             pointer-events: none;
             background: 
-                linear-gradient(to right, #00f2ff 2px, transparent 2px) 0 0,
-                linear-gradient(to bottom, #00f2ff 2px, transparent 2px) 0 0,
-                linear-gradient(to left, #00f2ff 2px, transparent 2px) 100% 0,
-                linear-gradient(to bottom, #00f2ff 2px, transparent 2px) 100% 0,
-                linear-gradient(to right, #00f2ff 2px, transparent 2px) 0 100%,
-                linear-gradient(to top, #00f2ff 2px, transparent 2px) 0 100%,
-                linear-gradient(to left, #00f2ff 2px, transparent 2px) 100% 100%,
-                linear-gradient(to top, #00f2ff 2px, transparent 2px) 100% 100%;
+                linear-gradient(to right, #FFB000 2px, transparent 2px) 0 0,
+                linear-gradient(to bottom, #FFB000 2px, transparent 2px) 0 0,
+                linear-gradient(to left, #FFB000 2px, transparent 2px) 100% 0,
+                linear-gradient(to bottom, #FFB000 2px, transparent 2px) 100% 0,
+                linear-gradient(to right, #FFB000 2px, transparent 2px) 0 100%,
+                linear-gradient(to top, #FFB000 2px, transparent 2px) 0 100%,
+                linear-gradient(to left, #FFB000 2px, transparent 2px) 100% 100%,
+                linear-gradient(to top, #FFB000 2px, transparent 2px) 100% 100%;
             background-repeat: no-repeat;
             background-size: 20px 20px;
             opacity: 0.5;
@@ -204,9 +209,9 @@ export default function Lobby({ onStart, settings, setSettings, onBack }) {
 
         .status-orb {
             width: 12px; height: 12px;
-            background: #00f2ff;
+            background: #00D2FF;
             border-radius: 50%;
-            box-shadow: 0 0 15px #00f2ff;
+            box-shadow: 0 0 15px #00D2FF;
             animation: breathe 2s infinite alternate;
         }
 
@@ -259,11 +264,11 @@ export default function Lobby({ onStart, settings, setSettings, onBack }) {
         }
         .cell-val { font-size: 24px; font-weight: 900; color: #fff; }
         .cell-bar { width: 40%; height: 2px; background: rgba(255,255,255,0.1); margin-top: 5px; }
-        .power-cell.active-cyan {
-            border-color: #00f2ff; background: rgba(0, 242, 255, 0.05);
-            transform: translateY(-5px); box-shadow: 0 5px 20px rgba(0, 242, 255, 0.2);
+        .power-cell.active-cobalt {
+            border-color: #00D2FF; background: rgba(0, 210, 255, 0.05);
+            transform: translateY(-5px); box-shadow: 0 5px 20px rgba(0, 210, 255, 0.2);
         }
-        .power-cell.active-cyan .cell-bar { background: #00f2ff; box-shadow: 0 0 10px #00f2ff; width: 60%; }
+        .power-cell.active-cobalt .cell-bar { background: #00D2FF; box-shadow: 0 0 10px #00D2FF; width: 60%; }
 
         /* Difficulty Matrix */
         .difficulty-matrix {
@@ -288,9 +293,9 @@ export default function Lobby({ onStart, settings, setSettings, onBack }) {
             display: flex; flex-direction: column; justify-content: center; align-items: center;
             cursor: pointer; transition: 0.3s; color: rgba(255, 0, 255, 0.3);
         }
-        .slot-hex.active-purple {
-            border-color: #ff00ff; color: #fff; background: rgba(255, 0, 255, 0.1);
-            box-shadow: 0 0 20px rgba(255, 0, 255, 0.3);
+        .slot-hex.active-orange {
+            border-color: #FF6B00; color: #fff; background: rgba(255, 107, 0, 0.1);
+            box-shadow: 0 0 20px rgba(255, 107, 0, 0.3);
         }
 
         /* Logs */
@@ -318,13 +323,13 @@ export default function Lobby({ onStart, settings, setSettings, onBack }) {
         .corner-tl { position: absolute; top: 0; left: 0; width: 6px; height: 6px; border-top: 1px solid #fff; border-left: 1px solid #fff; opacity: 0; }
         
         .matrix-item:hover { background: rgba(255,255,255,0.05); }
-        .matrix-item.targeted { border-color: #00ff88; background: rgba(0, 255, 136, 0.05); }
-        .matrix-item.targeted .matrix-text { color: #00ff88; }
-        .matrix-item.targeted .corner-tl { opacity: 0.5; }
+        .matrix-item.targeted-cobalt { border-color: #00D2FF; background: rgba(0, 210, 255, 0.05); }
+        .matrix-item.targeted-cobalt .matrix-text { color: #00D2FF; }
+        .matrix-item.targeted-cobalt .corner-tl { opacity: 0.5; }
 
         .scanning-bar {
             position: absolute; top: 0; left: 0; right: 0; height: 2px;
-            background: linear-gradient(90deg, transparent, #00ff88, transparent);
+            background: linear-gradient(90deg, transparent, #00D2FF, transparent);
             animation: matrix-scan 2s linear infinite;
         }
 
@@ -339,12 +344,12 @@ export default function Lobby({ onStart, settings, setSettings, onBack }) {
         }
 
         .launch-button {
-            height: 60px; padding: 0 40px; background: linear-gradient(45deg, #00f2ff, #bc13fe);
+            height: 60px; padding: 0 40px; background: linear-gradient(45deg, #00D2FF, #FF6B00);
             border: none; color: #fff; font-weight: 900; letter-spacing: 2px;
-            box-shadow: 0 5px 25px rgba(0, 242, 255, 0.3); transition: 0.3s;
+            box-shadow: 0 5px 25px rgba(0, 210, 255, 0.3); transition: 0.3s;
         }
         .launch-button:hover {
-            transform: scale(1.05); box-shadow: 0 10px 40px rgba(188, 19, 254, 0.5);
+            transform: scale(1.05); box-shadow: 0 10px 40px rgba(255, 107, 0, 0.5);
             color: #fff !important;
         }
 
@@ -357,10 +362,10 @@ export default function Lobby({ onStart, settings, setSettings, onBack }) {
         .custom-scrollbar::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.1); border-radius: 10px; }
 
         .goback-pulse-btn:hover {
-            color: #00f2ff !important;
-            border-color: #00f2ff !important;
-            background: rgba(0, 242, 255, 0.1) !important;
-            box-shadow: 0 0 15px rgba(0, 242, 255, 0.3);
+            color: #00D2FF !important;
+            border-color: #00D2FF !important;
+            background: rgba(0, 210, 255, 0.1) !important;
+            box-shadow: 0 0 15px rgba(0, 210, 255, 0.3);
             transform: translateY(-2px);
         }
       `}</style>

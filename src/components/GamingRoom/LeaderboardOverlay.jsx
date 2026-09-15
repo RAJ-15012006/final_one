@@ -31,11 +31,11 @@ export default function LeaderboardOverlay({ results, onClose }) {
         height={window.innerHeight} 
         recycle={false} 
         numberOfPieces={400}
-        colors={['#00f2ff', '#bc13fe', '#ff00ff']}
+        colors={['#00D2FF', '#FF6B00', '#FFFFFF']}
       />
       
       <div style={{ position: 'relative', width: '100%', maxWidth: '800px', animation: 'slideUp 0.5s ease-out' }}>
-        <div className="neon-card" style={{ padding: '40px', background: 'rgba(10, 10, 20, 0.95)', border: '2px solid var(--neon-cyan)', boxShadow: '0 0 50px rgba(0, 242, 255, 0.3)' }}>
+        <div className="neon-card" style={{ padding: '40px', background: 'rgba(10, 10, 20, 0.95)', border: '2px solid #00D2FF', boxShadow: '0 0 50px rgba(0, 210, 255, 0.3)' }}>
             <Button 
                 type="text" 
                 icon={<CloseOutlined />} 
@@ -45,15 +45,15 @@ export default function LeaderboardOverlay({ results, onClose }) {
 
             <div style={{ textAlign: 'center', marginBottom: '40px' }}>
                 <TrophyOutlined style={{ fontSize: '80px', color: '#ffcc00', filter: 'drop-shadow(0 0 20px #ffcc00)' }} />
-                <Title level={1} className="neon-text-cyan" style={{ fontSize: '48px', margin: '20px 0 0 0', fontWeight: 900 }}>CHALLENGE COMLETE</Title>
+                <Title level={1} style={{ fontSize: '48px', margin: '20px 0 0 0', fontWeight: 900, color: '#00D2FF' }}>CHALLENGE COMPLETE</Title>
                 <Text style={{ color: 'rgba(255,255,255,0.6)', letterSpacing: '2px' }}>RANKING UPDATED ON NEURAL NETWORK</Text>
             </div>
 
             <Space direction="vertical" size={16} style={{ width: '100%' }}>
                 {winners.map((winner, i) => (
                     <div key={i} style={{ 
-                        background: i === 0 ? 'rgba(0, 242, 255, 0.1)' : 'rgba(255,255,255,0.05)',
-                        border: `1px solid ${i === 0 ? 'var(--neon-cyan)' : 'rgba(255,255,255,0.1)'}`,
+                        background: i === 0 ? 'rgba(0, 210, 255, 0.1)' : 'rgba(255,255,255,0.05)',
+                        border: `1px solid ${i === 0 ? '#00D2FF' : 'rgba(255,255,255,0.1)'}`,
                         borderRadius: '16px',
                         padding: '15px 25px',
                         display: 'flex',
@@ -61,15 +61,15 @@ export default function LeaderboardOverlay({ results, onClose }) {
                         justifyContent: 'space-between'
                     }}>
                         <Space size={20}>
-                            <Title level={3} style={{ margin: 0, color: i === 0 ? 'var(--neon-cyan)' : '#888', width: '30px' }}>{winner.rank}</Title>
-                            <Avatar size={48} style={{ background: i === 0 ? 'var(--neon-cyan)' : 'var(--neon-purple)', color: '#000', fontWeight: 'bold' }}>{winner.avatar}</Avatar>
+                            <Title level={3} style={{ margin: 0, color: i === 0 ? '#00D2FF' : '#888', width: '30px' }}>{winner.rank}</Title>
+                            <Avatar size={48} style={{ background: i === 0 ? '#00D2FF' : '#FF6B00', color: '#000', fontWeight: 'bold' }}>{winner.avatar}</Avatar>
                             <div>
                                 <Title level={4} style={{ margin: 0, color: '#fff' }}>{winner.name}</Title>
                                 <Text style={{ color: 'rgba(255,255,255,0.4)', fontSize: '12px' }}>TIME: {winner.time} | ACCURACY: {winner.accuracy}%</Text>
                             </div>
                         </Space>
                         <div style={{ textAlign: 'right' }}>
-                            <Title level={3} style={{ margin: 0, color: 'var(--neon-magenta)' }}>+{winner.xp}</Title>
+                            <Title level={3} style={{ margin: 0, color: '#FF6B00' }}>+{winner.xp}</Title>
                             <Text style={{ color: 'rgba(255,255,255,0.3)', fontSize: '10px', textTransform: 'uppercase' }}>Credits Awarded</Text>
                         </div>
                     </div>
@@ -79,13 +79,13 @@ export default function LeaderboardOverlay({ results, onClose }) {
             <div style={{ marginTop: '40px', display: 'flex', gap: '20px' }}>
                 <Button 
                     className="neon-button" 
-                    style={{ flex: 1, height: '50px' }}
+                    style={{ flex: 1, height: '50px', borderColor: '#00D2FF', color: '#00D2FF' }}
                     onClick={onClose}
                 >
                     RETURN TO ROOM
                 </Button>
                 <Button 
-                    style={{ flex: 1, height: '50px', background: 'var(--neon-purple)', borderColor: 'var(--neon-purple)', color: '#fff', fontWeight: 900 }}
+                    style={{ flex: 1, height: '50px', background: '#FF6B00', borderColor: '#FF6B00', color: '#000', fontWeight: 900 }}
                     onClick={() => window.location.href = '/dashboard'}
                 >
                     BACK TO DASHBOARD

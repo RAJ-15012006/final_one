@@ -21,27 +21,21 @@ export default function Login() {
   const onFinish = async (values) => {
     setLoading(true);
     try {
-      const response = await fetch('http://127.0.0.1:8000/api/auth/login-json', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          id: values.username,
-          password: values.password
-        })
-      });
+      // Mock login using local data helper
+      const user = findUser(values.username, values.password);
 
-      if (response.ok) {
-        const data = await response.json();
-        login(data.user, data.access_token);
-        messageApi.success('Login successful!');
+      if (user) {
+        // Simulate JWT token
+        const mockToken = "mock-jwt-token-" + Math.random().toString(36).substring(7);
+        login(user, mockToken);
+        messageApi.success('Login successful (Mock Mode)!');
         navigate('/dashboard');
       } else {
-        const err = await response.json();
-        messageApi.error(err.detail || 'Invalid username or password');
+        messageApi.error('Invalid username or password');
       }
     } catch (error) {
       console.error("Login error:", error);
-      messageApi.error('Unable to connect to server');
+      messageApi.error('An error occurred during login');
     } finally {
       setLoading(false);
     }

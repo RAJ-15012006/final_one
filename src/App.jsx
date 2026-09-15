@@ -13,8 +13,27 @@ import GamingRoom from './pages/GamingRoom';
 import PremiumNotes from './pages/PremiumNotes';
 import CompanyPatterns from './pages/CompanyPatterns';
 import ProblemWiseNotes from './pages/ProblemWiseNotes';
+import PremiumViewer from './pages/PremiumViewer';
 import DirectResources from './pages/DirectResources';
+import DsaCheatSheets from './pages/DsaCheatSheets';
+import PracticePlatforms from './pages/PracticePlatforms';
+import InterviewGuides from './pages/InterviewGuides';
+import AlgorithmVisualizers from './pages/AlgorithmVisualizers';
+import SystemDesignResources from './pages/SystemDesignResources';
+import DeveloperTools from './pages/DeveloperTools';
+import AmazonInsights from './pages/AmazonInsights';
+import GoogleInsights from './pages/GoogleInsights';
+import MetaInsights from './pages/MetaInsights';
+import MicrosoftInsights from './pages/MicrosoftInsights';
+import AppleInsights from './pages/AppleInsights';
+import NetflixInsights from './pages/NetflixInsights';
 import TopicWiseMistakes from './pages/TopicWiseMistakes';
+import LinkedListMistakes from './pages/LinkedListMistakes';
+import DPMistakes from './pages/DPMistakes';
+import BSMistakes from './pages/BSMistakes';
+import DFSMistakes from './pages/DFSMistakes';
+import RecursiveMistakes from './pages/RecursiveMistakes';
+import ArrayStringMistakes from './pages/ArrayStringMistakes';
 import InterviewSimulator from './pages/InterviewSimulator';
 import MainLayout from './components/MainLayout';
 import ScrollToTop from './components/ScrollToTop';
@@ -95,10 +114,66 @@ function AppContent() {
         } 
       />
       <Route 
+        path="/premium-content/:id" 
+        element={
+          <ProtectedRoute>
+            <MainLayout><PremiumViewer /></MainLayout>
+          </ProtectedRoute>
+        } 
+      />
+      <Route 
         path="/direct-resources" 
         element={
           <ProtectedRoute>
             <DirectResources />
+          </ProtectedRoute>
+        } 
+      />
+      <Route 
+        path="/dsa-cheat-sheets" 
+        element={
+          <ProtectedRoute>
+            <DsaCheatSheets />
+          </ProtectedRoute>
+        } 
+      />
+      <Route 
+        path="/practice-platforms" 
+        element={
+          <ProtectedRoute>
+            <PracticePlatforms />
+          </ProtectedRoute>
+        } 
+      />
+      <Route 
+        path="/interview-guides" 
+        element={
+          <ProtectedRoute>
+            <InterviewGuides />
+          </ProtectedRoute>
+        } 
+      />
+      <Route 
+        path="/algorithm-visualizers" 
+        element={
+          <ProtectedRoute>
+            <AlgorithmVisualizers />
+          </ProtectedRoute>
+        } 
+      />
+      <Route 
+        path="/system-design-resources" 
+        element={
+          <ProtectedRoute>
+            <SystemDesignResources />
+          </ProtectedRoute>
+        } 
+      />
+      <Route 
+        path="/developer-tools" 
+        element={
+          <ProtectedRoute>
+            <DeveloperTools />
           </ProtectedRoute>
         } 
       />
@@ -110,6 +185,60 @@ function AppContent() {
           </ProtectedRoute>
         } 
       />
+      <Route 
+        path="/linked-list-mistakes" 
+        element={
+          <ProtectedRoute>
+            <LinkedListMistakes />
+          </ProtectedRoute>
+        } 
+      />
+      <Route 
+        path="/dp-mistakes" 
+        element={
+          <ProtectedRoute>
+            <DPMistakes />
+          </ProtectedRoute>
+        } 
+      />
+      <Route 
+        path="/bs-mistakes" 
+        element={
+          <ProtectedRoute>
+            <BSMistakes />
+          </ProtectedRoute>
+        } 
+      />
+      <Route 
+        path="/dfs-mistakes" 
+        element={
+          <ProtectedRoute>
+            <DFSMistakes />
+          </ProtectedRoute>
+        } 
+      />
+      <Route 
+        path="/recursive-mistakes" 
+        element={
+          <ProtectedRoute>
+            <RecursiveMistakes />
+          </ProtectedRoute>
+        } 
+      />
+      <Route 
+        path="/array-string-mistakes" 
+        element={
+          <ProtectedRoute>
+            <ArrayStringMistakes />
+          </ProtectedRoute>
+        } 
+      />
+      <Route path="/company/amazon" element={<ProtectedRoute><AmazonInsights /></ProtectedRoute>} />
+      <Route path="/company/google" element={<ProtectedRoute><GoogleInsights /></ProtectedRoute>} />
+      <Route path="/company/meta" element={<ProtectedRoute><MetaInsights /></ProtectedRoute>} />
+      <Route path="/company/microsoft" element={<ProtectedRoute><MicrosoftInsights /></ProtectedRoute>} />
+      <Route path="/company/apple" element={<ProtectedRoute><AppleInsights /></ProtectedRoute>} />
+      <Route path="/company/netflix" element={<ProtectedRoute><NetflixInsights /></ProtectedRoute>} />
       <Route 
         path="/interview-simulator" 
         element={
@@ -129,7 +258,7 @@ function AppContent() {
       {/* Redirect root based on auth status */}
       <Route 
         path="/" 
-        element={isAuthenticated ? <Navigate to="/dashboard" replace /> : <Navigate to="/login" replace />} 
+        element={<Navigate to="/login" replace />} 
       />
       <Route path="*" element={<Navigate to="/" replace />} />
     </Routes>

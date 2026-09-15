@@ -21,42 +21,48 @@ const MISTAKE_CARDS = [
     desc: 'Pointer errors, null checks, and traversal bugs.',
     icon: <LinkOutlined />,
     color: '#00f2ff', // Cyan
-    background: 'rgba(0, 40, 60, 0.4)'
+    background: 'rgba(0, 40, 60, 0.4)',
+    path: '/linked-list-mistakes'
   },
   {
     title: 'Why Your Dynamic Programming Code Fails',
     desc: 'Wrong state transitions, memoization mistakes, and overlapping subproblems.',
     icon: <DotChartOutlined />,
     color: '#bc13fe', // Purple
-    background: 'rgba(40, 0, 60, 0.4)'
+    background: 'rgba(40, 0, 60, 0.4)',
+    path: '/dp-mistakes'
   },
   {
     title: 'Binary Search Bugs Developers Make',
     desc: 'Off-by-one errors, infinite loops, incorrect boundaries.',
     icon: <SearchOutlined />,
     color: '#00d2ff', // Blue
-    background: 'rgba(0, 30, 80, 0.4)'
+    background: 'rgba(0, 30, 80, 0.4)',
+    path: '/bs-mistakes'
   },
   {
     title: 'Graph DFS Errors Beginners Make',
     desc: 'Missing visited sets, cycle detection issues, and stack management.',
     icon: <NodeIndexOutlined />,
     color: '#8a2be2', // Deep Purple
-    background: 'rgba(30, 0, 80, 0.4)'
+    background: 'rgba(30, 0, 80, 0.4)',
+    path: '/dfs-mistakes'
   },
   {
     title: 'Recursive Thinking: Common Pitfalls',
     desc: 'Missing base cases, stack overflow, and incorrect recursive steps.',
     icon: <ThunderboltOutlined />,
     color: '#00ff88', // Green (Changed from Orange)
-    background: 'rgba(0, 60, 40, 0.4)'
+    background: 'rgba(0, 60, 40, 0.4)',
+    path: '/recursive-mistakes'
   },
   {
     title: 'Array & String Manipulation Errors',
     desc: 'Out of bounds access, off-by-one index mistakes, and improper string copying.',
     icon: <TableOutlined />,
     color: '#ff00ff', // Pink/Magenta (Changed from Orange)
-    background: 'rgba(60, 0, 60, 0.4)'
+    background: 'rgba(60, 0, 60, 0.4)',
+    path: '/array-string-mistakes'
   }
 ];
 
@@ -140,6 +146,7 @@ export default function TopicWiseMistakes() {
             <Col xs={24} md={12} lg={8} key={index} style={{ display: 'flex' }}>
               <div
                 className="mistake-card"
+                onClick={() => mistake.path && navigate(mistake.path)}
                 style={{
                   background: mistake.background,
                   backdropFilter: 'blur(30px)',

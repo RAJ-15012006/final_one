@@ -15,6 +15,8 @@ import LeaderboardOverlay from '../components/GamingRoom/LeaderboardOverlay';
 import CodingStats from '../components/GamingRoom/CodingStats';
 import WaitingRoom from '../components/GamingRoom/WaitingRoom';
 
+import codingBg from '../assets/coding_room_bg.png';
+
 export default function GamingRoom() {
   const [gameState, setGameState] = useState('STATS'); // STATS, SETUP, WAITING, ARENA, RESULTS
   const [gameSettings, setGameSettings] = useState(() => ({
@@ -46,7 +48,15 @@ export default function GamingRoom() {
 
   return (
     <MainLayout forceCollapse={gameState === 'ARENA'}>
-      <div className="gaming-hub-container" style={{ padding: '0 20px 40px 20px', minHeight: '80vh' }}>
+      <div className="gaming-hub-container" style={{ 
+        padding: '0 20px 40px 20px', 
+        minHeight: '100vh',
+        backgroundImage: `linear-gradient(rgba(0,0,0,0.7), rgba(0,0,0,0.7)), url(${codingBg})`,
+        backgroundSize: 'cover',
+        backgroundPosition: 'center',
+        backgroundAttachment: 'fixed',
+        position: 'relative'
+      }}>
         {gameState === 'STATS' && (
           <CodingStats onContinue={handleStartSetup} />
         )}

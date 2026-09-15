@@ -21,42 +21,27 @@ export default function Register() {
   const onFinish = async (values) => {
     setLoading(true);
     try {
-      const response = await fetch('http://127.0.0.1:8000/api/auth/register', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          id: values.username,
-          name: values.fullName,
-          email: values.email,
-          password: values.password
-        })
+      // Mock registration using local data helper
+      const result = registerUser({
+        id: values.username,
+        name: values.fullName,
+        email: values.email,
+        password: values.password
       });
 
-      if (response.ok) {
+      if (result.success) {
         // Auto-login after successful registration
-        const loginRes = await fetch('http://127.0.0.1:8000/api/auth/login-json', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({
-            id: values.username,
-            password: values.password
-          })
-        });
+        const mockToken = "mock-jwt-token-" + Math.random().toString(36).substring(7);
+        login(result.user, mockToken);
         
-        if (loginRes.ok) {
-           const data = await loginRes.json();
-           login(data.user, data.access_token);
-        }
-        
-        messageApi.success('Registration successful!');
+        messageApi.success('Registration successful (Mock Mode)!');
         setTimeout(() => navigate('/dashboard'), 1000);
       } else {
-        const err = await response.json();
-        messageApi.error(err.detail || 'Registration failed');
+        messageApi.error(result.message || 'Registration failed');
       }
     } catch (error) {
       console.error("Registration error:", error);
-      messageApi.error('Unable to connect to server');
+      messageApi.error('An error occurred during registration');
     } finally {
       setLoading(false);
     }

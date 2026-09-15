@@ -9,21 +9,17 @@ export const ProgressProvider = ({ children }) => {
 
   // Load progress when user changes
   useEffect(() => {
-    const fetchProgress = async () => {
-      if (user && token) {
+    const fetchProgress = () => {
+      if (user) {
         try {
-          const res = await fetch('http://127.0.0.1:8000/api/progress/', {
-            headers: { 'Authorization': `Bearer ${token}` }
-          });
-          if (res.ok) {
-            const data = await res.json();
-            setSolvedHistory(data);
+          const storedHistory = localStorage.getItem(`progress_${user.id}`);
+          if (storedHistory) {
+            setSolvedHistory(JSON.parse(storedHistory));
           } else {
-            console.error("Failed to fetch progress from API");
             setSolvedHistory([]);
           }
         } catch (err) {
-          console.error("Failed to connect to progress API:", err);
+          console.error("Failed to load progress from localStorage:", err);
           setSolvedHistory([]);
         }
       } else {
@@ -31,7 +27,7 @@ export const ProgressProvider = ({ children }) => {
       }
     };
     fetchProgress();
-  }, [user, token]);
+  }, [user]);
 
   // Derived state for solved problem IDs
   const solvedProblems = useMemo(() => solvedHistory.map(item => item.problemId), [solvedHistory]);
@@ -98,30 +94,25 @@ export const ProgressProvider = ({ children }) => {
 
   // Mark a problem as solved
   const markAsSolved = async (problemId) => {
-    if (!user || !token) return;
+    if (!user) return;
     
     // Optimistic UI update
     const newItem = { problemId, solvedAt: new Date().toISOString() };
+    let newHistory = [];
+    
     setSolvedHistory(prev => {
       if (prev.find(item => item.problemId === problemId)) return prev;
-      return [...prev, newItem];
-    });
-
-    try {
-      const res = await fetch('http://127.0.0.1:8000/api/progress/solved', {
-        method: 'POST',
-        headers: { 
-          'Content-Type': 'application/json',
-          'Authorization': `Bearer ${token}`
-        },
-        body: JSON.stringify({ problemId })
-      });
-      if (!res.ok) {
-        console.error("Failed to save progress on server");
+      newHistory = [...prev, newItem];
+      
+      // Persist to localStorage
+      try {
+        localStorage.setItem(`progress_${user.id}`, JSON.stringify(newHistory));
+      } catch (err) {
+        console.error("Error saving progress to localStorage:", err);
       }
-    } catch (err) {
-      console.error("Error saving progress:", err);
-    }
+      
+      return newHistory;
+    });
   };
 
   const isSolved = (problemId) => solvedProblems.includes(problemId);

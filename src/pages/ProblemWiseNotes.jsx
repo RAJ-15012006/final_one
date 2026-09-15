@@ -96,7 +96,7 @@ export default function ProblemWiseNotes() {
       background: `linear-gradient(rgba(0, 0, 0, 0.75), rgba(0, 0, 0, 0.85)), url(${PremiumNotesBG})`,
       backgroundSize: 'cover',
       backgroundPosition: 'center',
-      backgroundAttachment: 'fixed',
+      scrollBehavior: 'smooth',
       color: '#fff',
       padding: '80px 40px',
       position: 'relative',
@@ -209,6 +209,7 @@ export default function ProblemWiseNotes() {
             <Col xs={24} md={12} lg={8} key={index}>
               <div
                 className="glass-card note-category-card"
+                onClick={() => navigate(`/premium-content/${cat.title.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/(^-|-$)/g, '')}`)}
                 style={{
                   background: 'rgba(15, 8, 4, 0.45)',
                   backdropFilter: 'blur(30px)',
