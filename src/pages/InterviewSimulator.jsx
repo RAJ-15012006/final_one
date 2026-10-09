@@ -1,12 +1,15 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { Typography, Row, Col, Space, Button, Input, List, Avatar, Tooltip, notification, Modal } from 'antd';
-import { ThunderboltOutlined, MessageOutlined, BulbOutlined, LineChartOutlined, StarOutlined, RobotOutlined, ArrowRightOutlined, UserOutlined, SendOutlined, WarningOutlined } from '@ant-design/icons';
+import { ThunderboltOutlined, MessageOutlined, BulbOutlined, LineChartOutlined, StarOutlined, RobotOutlined, ArrowRightOutlined, UserOutlined, SendOutlined, WarningOutlined, LockOutlined, CreditCardOutlined } from '@ant-design/icons';
 import ReactMarkdown from 'react-markdown';
 import remarkGfm from 'remark-gfm';
 import { useNavigate } from 'react-router-dom';
 import MainLayout from '../components/MainLayout';
+import { useAuth } from '../context/AuthContext';
 
 const { Title, Text } = Typography;
+
+const MAX_FREE_INTERVIEWS = 2;
 
 export default function InterviewSimulator() {
   const [isStarted, setIsStarted] = useState(false);
@@ -15,8 +18,11 @@ export default function InterviewSimulator() {
   const [isTyping, setIsTyping] = useState(false);
   const [activeDomain, setActiveDomain] = useState(null);
   const [warnings, setWarnings] = useState(0);
+  const [showPaywall, setShowPaywall] = useState(false);
+  const [interviewCount, setInterviewCount] = useState(0);
   const messagesEndRef = useRef(null);
   const navigate = useNavigate();
+  const { user } = useAuth();
 
   const API_KEY = import.meta.env.VITE_GROQ_API_KEY;
 
@@ -24,6 +30,13 @@ export default function InterviewSimulator() {
     "Cybersecurity", "AIML", "Edge software development", 
     "ML engineer", "Data scientist", "SQL", "DSA"
   ];
+
+  // Load interview count from localStorage on mount
+  useEffect(() => {
+    const key = `interview_count_${user?.id || 'guest'}`;
+    const count = parseInt(localStorage.getItem(key) || '0');
+    setInterviewCount(count);
+  }, [user]);
 
   useEffect(() => {
     messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
@@ -85,8 +98,20 @@ export default function InterviewSimulator() {
   };
 
   const handleStart = async () => {
+    // Check interview limit
+    if (interviewCount >= MAX_FREE_INTERVIEWS) {
+      setShowPaywall(true);
+      return;
+    }
+
     const granted = await requestPermissions();
-    if (!granted) return; // Prevent starting if no permission
+    if (!granted) return;
+
+    // Increment interview count in localStorage
+    const key = `interview_count_${user?.id || 'guest'}`;
+    const newCount = interviewCount + 1;
+    localStorage.setItem(key, newCount.toString());
+    setInterviewCount(newCount);
 
     setIsStarted(true);
     setMessages([
@@ -274,33 +299,51 @@ export default function InterviewSimulator() {
                 <Title style={{ color: '#fff', fontSize: '48px', fontWeight: '900', margin: '0 0 16px 0', lineHeight: '1.1' }}>
                   Interviewer Simulator
                 </Title>
-                <Text style={{ color: 'rgba(255, 255, 255, 0.6)', fontSize: '20px', display: 'block', marginBottom: '48px' }}>
+
+                <Text style={{ color: 'rgba(255, 255, 255, 0.6)', fontSize: '20px', display: 'block', marginBottom: '16px' }}>
                   Real Chat-Based Mock Interviews powered by AI. <br/>
-                  <small style={{ color: '#faad14' }}>Requires Camera & Mic permissions for proctoring.</small>
+                  <small style={{ color: '#faad14' }}>Requires Camera &amp; Mic permissions for proctoring.</small>
                 </Text>
 
-                <Button 
-                  type="primary" 
+                {/* Free attempts counter badge */}
+                <div style={{ marginBottom: '32px', padding: '12px 20px', background: interviewCount >= MAX_FREE_INTERVIEWS ? 'rgba(255, 77, 79, 0.1)' : 'rgba(0, 242, 255, 0.05)', borderRadius: '12px', border: `1px solid ${interviewCount >= MAX_FREE_INTERVIEWS ? 'rgba(255,77,79,0.4)' : 'rgba(0,242,255,0.2)'}`, display: 'inline-block' }}>
+                  {interviewCount >= MAX_FREE_INTERVIEWS ? (
+                    <Space>
+                      <LockOutlined style={{ color: '#ff4d4f' }} />
+                      <Text style={{ color: '#ff4d4f' }}>Free interviews used ({interviewCount}/{MAX_FREE_INTERVIEWS}). Unlock more for <strong>$10</strong>.</Text>
+                    </Space>
+                  ) : (
+                    <Space>
+                      <Text style={{ color: '#00f2ff' }}>Free interviews remaining: <strong style={{ color: '#fff' }}>{MAX_FREE_INTERVIEWS - interviewCount}</strong> / {MAX_FREE_INTERVIEWS}</Text>
+                    </Space>
+                  )}
+                </div>
+                <br />
+
+                <Button
+                  type="primary"
                   size="large"
-                  icon={<ArrowRightOutlined />}
+                  icon={interviewCount >= MAX_FREE_INTERVIEWS ? <LockOutlined /> : <ArrowRightOutlined />}
                   onClick={handleStart}
                   style={{
                     height: '64px',
                     padding: '0 48px',
                     borderRadius: '32px',
-                    background: 'linear-gradient(90deg, #00f2ff, #bc13fe)',
-                    border: 'none',
+                    background: interviewCount >= MAX_FREE_INTERVIEWS
+                      ? 'rgba(80, 80, 80, 0.5)'
+                      : 'linear-gradient(90deg, #00f2ff, #bc13fe)',
+                    border: interviewCount >= MAX_FREE_INTERVIEWS ? '1px solid rgba(255,77,79,0.5)' : 'none',
                     fontSize: '20px',
                     fontWeight: '900',
                     display: 'inline-flex',
                     alignItems: 'center',
                     flexDirection: 'row-reverse',
                     gap: '12px',
-                    boxShadow: '0 15px 30px rgba(188, 19, 254, 0.3)',
+                    boxShadow: interviewCount >= MAX_FREE_INTERVIEWS ? 'none' : '0 15px 30px rgba(188, 19, 254, 0.3)',
                     transition: 'all 0.3s'
                   }}
                 >
-                  Start Mock Interview
+                  {interviewCount >= MAX_FREE_INTERVIEWS ? 'Locked — Pay $10 to Unlock' : 'Start Mock Interview'}
                 </Button>
               </Col>
               
@@ -308,13 +351,55 @@ export default function InterviewSimulator() {
                 <div style={{ background: 'rgba(0,0,0,0.4)', borderRadius: '24px', border: '1px solid rgba(0,242,255,0.2)', padding: '30px', minHeight: '300px', display: 'flex', flexDirection: 'column', gap: '24px', justifyContent: 'center', alignItems: 'center' }}>
                     <RobotOutlined style={{ fontSize: '48px', color: '#00f2ff' }} />
                     <Text style={{ color: '#fff', fontSize: '18px' }}>AI Mock Interview Simulator</Text>
-                    <Text style={{ color: 'rgba(255,255,255,0.5)', textAlign: 'center' }}>Supports Cybersecurity, AIML, Data Science & More</Text>
+                    <Text style={{ color: 'rgba(255,255,255,0.5)', textAlign: 'center' }}>Supports Cybersecurity, AIML, Data Science &amp; More</Text>
                 </div>
               </Col>
             </Row>
           </div>
         </div>
       )}
+
+      {/* Paywall Modal */}
+      <Modal
+        open={showPaywall}
+        onCancel={() => setShowPaywall(false)}
+        footer={null}
+        centered
+      >
+        <div style={{ padding: '20px 0', textAlign: 'center' }}>
+          <LockOutlined style={{ fontSize: '52px', color: '#ff4d4f', marginBottom: '16px' }} />
+          <Title level={3}>Free Limit Reached</Title>
+          <Text style={{ display: 'block', marginBottom: '8px', fontSize: '16px' }}>
+            You have used all <strong>{MAX_FREE_INTERVIEWS}</strong> free mock interviews.
+          </Text>
+          <Text type="secondary" style={{ display: 'block', marginBottom: '32px' }}>
+            Unlock unlimited access with a one-time payment of <strong style={{ color: '#bc13fe' }}>$10</strong>.
+          </Text>
+          <Button
+            type="primary"
+            size="large"
+            icon={<CreditCardOutlined />}
+            onClick={() => {
+              notification.info({
+                message: 'Payment Gateway',
+                description: 'Payment integration coming soon! Contact the admin to upgrade your account.',
+              });
+              setShowPaywall(false);
+            }}
+            style={{
+              background: 'linear-gradient(90deg, #00f2ff, #bc13fe)',
+              border: 'none',
+              height: '48px',
+              padding: '0 32px',
+              borderRadius: '24px',
+              fontWeight: 'bold',
+              fontSize: '16px'
+            }}
+          >
+            Pay $10 — Unlock Unlimited Interviews
+          </Button>
+        </div>
+      </Modal>
     </MainLayout>
   );
 }

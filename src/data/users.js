@@ -3,7 +3,7 @@ const defaultUsers = [
   {
     id: 'student1',
     password: 'password123',
-    name: 'Yashesvi',
+    name: 'Raj',
     email: 'yashesvi@example.com'
   },
   {
