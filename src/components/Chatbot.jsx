@@ -21,7 +21,6 @@ export default function Chatbot({ problemData, userName, isFullPage = false }) {
 
   const API_KEY = import.meta.env.VITE_GROQ_API_KEY;
 
-  // Initialize messages when problem changes
   useEffect(() => {
     if (problemData) {
       setMessages([
@@ -35,7 +34,6 @@ export default function Chatbot({ problemData, userName, isFullPage = false }) {
     }
   }, [problemData, userName]);
 
-  // Auto-scroll to bottom of chat
   useEffect(() => {
     messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
   }, [messages, isTyping]);
@@ -72,10 +70,10 @@ export default function Chatbot({ problemData, userName, isFullPage = false }) {
       if (data.choices && data.choices.length > 0) {
         return data.choices[0].message.content;
       }
-      return "Sorry, I couldn't process that response.";
+      return `API Error: ${data.error?.message || 'Unknown error from Groq'}`;
     } catch (error) {
       console.error(error);
-      return "Network error occurred while calling the AI API.";
+      return `Network error: ${error.message}`;
     }
   };
 
@@ -83,18 +81,18 @@ export default function Chatbot({ problemData, userName, isFullPage = false }) {
     let textToSend = overrideText || inputValue;
     if (!textToSend.trim()) return;
 
-    // Handle hint tracking
-    if (textToSend === "Hint") {
+    if (overrideText === "Hint") {
       if (hintsRemaining > 0) {
         setHintsRemaining(prev => prev - 1);
         textToSend = `Please give me a hint for the problem. I have ${hintsRemaining - 1} hints left after this. Keep it short.`;
       } else {
-        setMessages(prev => [...prev, { id: Date.now(), sender: 'user', text: "Hint" }, { id: Date.now() + 1, sender: 'bot', text: "You have used all 3 hints! If you are still stuck, you can ask for the full solution." }]);
+        setMessages(prev => [...prev, { id: Date.now(), sender: 'user', text: "Hint" }, { id: Date.now() + 1, sender: 'bot', text: "You have used all 3 hints! The 'Full Solution' button is now unlocked." }]);
         return;
       }
     }
 
-    const newUserMsg = { id: Date.now(), sender: 'user', text: overrideText === "Hint" ? "Hint" : textToSend };
+    const displayUserText = overrideText === "Hint" ? "Hint" : textToSend;
+    const newUserMsg = { id: Date.now(), sender: 'user', text: displayUserText };
     setMessages(prev => [...prev, newUserMsg]);
     if (!overrideText) setInputValue('');
     setIsTyping(true);
@@ -257,7 +255,11 @@ export default function Chatbot({ problemData, userName, isFullPage = false }) {
               </Button>
             </Col>
             <Col>
-              <Button size="small" type="primary" danger onClick={() => handleSend("Show full solution")}>Full Solution</Button>
+              <Tooltip title={hintsRemaining > 0 ? `Use ${hintsRemaining} more hint(s) to unlock full solution` : "Show full solution"}>
+                <Button size="small" type="primary" danger disabled={hintsRemaining > 0} onClick={() => handleSend("Show full solution")}>
+                  Full Solution
+                </Button>
+              </Tooltip>
             </Col>
          </Row>
       </div>

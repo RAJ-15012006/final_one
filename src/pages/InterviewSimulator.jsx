@@ -1,8 +1,9 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { Typography, Row, Col, Space, Button, Input, List, Avatar, Tooltip } from 'antd';
-import { ThunderboltOutlined, MessageOutlined, BulbOutlined, LineChartOutlined, StarOutlined, RobotOutlined, ArrowRightOutlined, UserOutlined, SendOutlined } from '@ant-design/icons';
+import { Typography, Row, Col, Space, Button, Input, List, Avatar, Tooltip, notification, Modal } from 'antd';
+import { ThunderboltOutlined, MessageOutlined, BulbOutlined, LineChartOutlined, StarOutlined, RobotOutlined, ArrowRightOutlined, UserOutlined, SendOutlined, WarningOutlined } from '@ant-design/icons';
 import ReactMarkdown from 'react-markdown';
 import remarkGfm from 'remark-gfm';
+import { useNavigate } from 'react-router-dom';
 import MainLayout from '../components/MainLayout';
 
 const { Title, Text } = Typography;
@@ -12,22 +13,87 @@ export default function InterviewSimulator() {
   const [messages, setMessages] = useState([]);
   const [inputValue, setInputValue] = useState('');
   const [isTyping, setIsTyping] = useState(false);
-  const [isRAGMode, setIsRAGMode] = useState(false);
+  const [activeDomain, setActiveDomain] = useState(null);
+  const [warnings, setWarnings] = useState(0);
   const messagesEndRef = useRef(null);
+  const navigate = useNavigate();
 
   const API_KEY = import.meta.env.VITE_GROQ_API_KEY;
+
+  const DOMAINS = [
+    "Cybersecurity", "AIML", "Edge software development", 
+    "ML engineer", "Data scientist", "SQL", "DSA"
+  ];
 
   useEffect(() => {
     messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
   }, [messages, isTyping]);
 
-  const handleStart = () => {
+  useEffect(() => {
+    if (isStarted) {
+      // Anti-cheat: Tab switching detection
+      const handleVisibilityChange = () => {
+        if (document.hidden) {
+          setWarnings(prev => {
+            const newWarnings = prev + 1;
+            if (newWarnings >= 3) {
+              Modal.error({
+                title: 'Interview Terminated',
+                content: 'You have violated the proctoring rules by switching tabs multiple times. Your session is terminated.',
+                onOk: () => navigate('/dashboard')
+              });
+            } else {
+              notification.warning({
+                message: 'Proctoring Warning',
+                description: `Warning ${newWarnings}/2: Please do not switch tabs during the interview.`,
+                icon: <WarningOutlined style={{ color: '#faad14' }} />,
+                duration: 5,
+              });
+            }
+            return newWarnings;
+          });
+        }
+      };
+
+      const handleCopy = (e) => {
+        e.preventDefault();
+        notification.error({
+          message: 'Action Blocked',
+          description: 'Copying text is disabled during the mock interview.',
+        });
+      };
+
+      document.addEventListener('visibilitychange', handleVisibilityChange);
+      document.addEventListener('copy', handleCopy);
+
+      return () => {
+        document.removeEventListener('visibilitychange', handleVisibilityChange);
+        document.removeEventListener('copy', handleCopy);
+      };
+    }
+  }, [isStarted, navigate]);
+
+  const requestPermissions = async () => {
+    try {
+      await navigator.mediaDevices.getUserMedia({ video: true, audio: true });
+      notification.success({ message: 'Proctoring Active', description: 'Camera and microphone access granted.' });
+      return true;
+    } catch (err) {
+      notification.error({ message: 'Permission Denied', description: 'You must allow camera and microphone access to start the interview.' });
+      return false;
+    }
+  };
+
+  const handleStart = async () => {
+    const granted = await requestPermissions();
+    if (!granted) return; // Prevent starting if no permission
+
     setIsStarted(true);
     setMessages([
       {
         id: Date.now(),
         sender: 'bot',
-        text: `Welcome to the Premium AI Interviewer.\n\nPlease select your interview domain. You can type **AIML** to start a mock interview based on the uploaded **RAJ PDF** knowledge base.`
+        text: `Welcome to the Premium AI Interviewer.\n\nPlease select your interview domain below to start a mock interview based on the RAG knowledge base.`
       }
     ]);
   };
@@ -60,11 +126,27 @@ export default function InterviewSimulator() {
       if (data.choices && data.choices.length > 0) {
         return data.choices[0].message.content;
       }
-      return "Sorry, I couldn't process that response.";
+      return `API Error: ${data.error?.message || 'Unknown error'}`;
     } catch (error) {
       console.error(error);
-      return "Network error occurred while calling the AI API.";
+      return `Network error: ${error.message}`;
     }
+  };
+
+  const startDomainInterview = async (domain) => {
+    setActiveDomain(domain);
+    const startMsg = `I want to start the interview for ${domain}.`;
+    setMessages(prev => [...prev, { id: Date.now(), sender: 'user', text: startMsg }]);
+    setIsTyping(true);
+
+    const systemPrompt = `You are an expert technical interviewer for the domain: ${domain}. 
+    Ask a challenging, entry-to-mid level interview question (coding or theory). 
+    Wait for the user's response.`;
+    
+    const responseText = await callGroqAPI(startMsg, systemPrompt, []);
+    
+    setIsTyping(false);
+    setMessages(prev => [...prev, { id: Date.now() + 1, sender: 'bot', text: responseText }]);
   };
 
   const handleSend = async () => {
@@ -76,21 +158,16 @@ export default function InterviewSimulator() {
     setIsTyping(true);
 
     let responseText = "";
-    const lowerInput = textToSend.toLowerCase();
 
-    if (!isRAGMode && (lowerInput === "aiml" || lowerInput === "aiiml")) {
-      setIsRAGMode(true);
-      responseText = `*Loading context from RAJ.pdf...*\n\nKnowledge base loaded! I will now conduct your AI/ML interview based on RAJ.pdf. Let's begin!\n\n**Question 1:** What is the fundamental difference between supervised and unsupervised learning according to the text?`;
-    } else if (isRAGMode) {
-      const systemPrompt = `You are an expert AI/ML technical interviewer conducting a mock interview. 
-      You are strictly asking questions based on the uploaded document "RAJ.pdf", which contains introductory AI/ML concepts (Supervised vs Unsupervised, Deep Learning, CNNs, Transformers, Overfitting, Evaluation Metrics). 
+    if (activeDomain) {
+      const systemPrompt = `You are an expert technical interviewer conducting a mock interview for the domain: ${activeDomain}. 
       The user just answered your previous question. 
-      Critique their answer briefly but constructively, then ask the NEXT technical question from a different topic within AI/ML. 
+      Critique their answer briefly but constructively, then ask the NEXT technical question (could be theory or coding). 
       Do not break character. Use markdown formatting for readability.`;
       
-      responseText = await callGroqAPI(textToSend, systemPrompt, messages.filter(m => m.id !== messages[0].id)); // Exclude the first welcome message to save tokens/context if needed, but we can pass it all.
+      responseText = await callGroqAPI(textToSend, systemPrompt, messages.filter(m => m.id !== messages[0].id));
     } else {
-      responseText = `I am currently programmed to run specific modules. Please type **AIML** to load the RAJ PDF interview module.`;
+      responseText = `Please select an interview domain first.`;
     }
     
     setIsTyping(false);
@@ -103,17 +180,17 @@ export default function InterviewSimulator() {
       <div style={{ padding: '16px 24px', background: 'rgba(255,255,255,0.05)', borderBottom: '1px solid rgba(255,255,255,0.1)', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
         <Space>
           <RobotOutlined style={{ color: '#00f2ff', fontSize: '24px' }} />
-          <Title level={4} style={{ margin: 0, color: '#fff' }}>RAG Interview Simulator</Title>
+          <Title level={4} style={{ margin: 0, color: '#fff' }}>Proctored Interview Simulator</Title>
         </Space>
-        {isRAGMode && (
+        {activeDomain && (
           <div style={{ background: 'rgba(0, 242, 255, 0.1)', padding: '4px 12px', borderRadius: '4px', border: '1px solid rgba(0,242,255,0.3)' }}>
-            <Text style={{ color: '#00f2ff', fontSize: '12px' }}>Knowledge Base: RAJ.pdf</Text>
+            <Text style={{ color: '#00f2ff', fontSize: '12px' }}>Domain: {activeDomain}</Text>
           </div>
         )}
       </div>
 
       {/* Chat Area */}
-      <div style={{ flex: 1, overflowY: 'auto', padding: '24px' }}>
+      <div style={{ flex: 1, overflowY: 'auto', padding: '24px', userSelect: 'none' }}>
         <List
           itemLayout="horizontal"
           dataSource={messages}
@@ -134,6 +211,17 @@ export default function InterviewSimulator() {
                 lineHeight: '1.6'
               }}>
                 <ReactMarkdown remarkPlugins={[remarkGfm]}>{msg.text}</ReactMarkdown>
+                
+                {/* Show domain choices if bot is asking for domain and no domain selected */}
+                {!activeDomain && msg.id === messages[0]?.id && (
+                  <div style={{ marginTop: '16px', display: 'flex', flexWrap: 'wrap', gap: '8px' }}>
+                    {DOMAINS.map(d => (
+                      <Button key={d} type="primary" ghost size="small" onClick={() => startDomainInterview(d)}>
+                        {d}
+                      </Button>
+                    ))}
+                  </div>
+                )}
               </div>
             </div>
           )}
@@ -153,11 +241,12 @@ export default function InterviewSimulator() {
       <div style={{ padding: '20px', borderTop: '1px solid rgba(255,255,255,0.1)', background: 'rgba(0,0,0,0.5)' }}>
         <Input
           size="large"
-          placeholder="Type your response... (Type 'AIML' to start RAG module)"
+          placeholder="Type your response..."
           value={inputValue}
+          disabled={!activeDomain}
           onChange={(e) => setInputValue(e.target.value)}
           onPressEnter={handleSend}
-          suffix={<Button type="text" icon={<SendOutlined style={{ color: '#00f2ff' }} />} onClick={handleSend} />}
+          suffix={<Button type="text" icon={<SendOutlined style={{ color: '#00f2ff' }} />} onClick={handleSend} disabled={!activeDomain} />}
           style={{ background: 'rgba(255,255,255,0.05)', border: '1px solid rgba(255,255,255,0.2)', color: '#fff', borderRadius: '8px' }}
         />
       </div>
@@ -180,13 +269,14 @@ export default function InterviewSimulator() {
             <Row gutter={[48, 48]} align="middle">
               <Col xs={24} lg={13}>
                 <div style={{ display: 'inline-block', background: 'linear-gradient(90deg, #00f2ff, #bc13fe)', padding: '4px 16px', borderRadius: '20px', marginBottom: '24px' }}>
-                  <Text style={{ color: '#fff', fontWeight: 'bold', fontSize: '12px', textTransform: 'uppercase', letterSpacing: '1px' }}>Game-Changing Feature</Text>
+                  <Text style={{ color: '#fff', fontWeight: 'bold', fontSize: '12px', textTransform: 'uppercase', letterSpacing: '1px' }}>Proctored Environment</Text>
                 </div>
                 <Title style={{ color: '#fff', fontSize: '48px', fontWeight: '900', margin: '0 0 16px 0', lineHeight: '1.1' }}>
                   Interviewer Simulator
                 </Title>
                 <Text style={{ color: 'rgba(255, 255, 255, 0.6)', fontSize: '20px', display: 'block', marginBottom: '48px' }}>
-                  Real Chat-Based Mock Interviews powered by AI
+                  Real Chat-Based Mock Interviews powered by AI. <br/>
+                  <small style={{ color: '#faad14' }}>Requires Camera & Mic permissions for proctoring.</small>
                 </Text>
 
                 <Button 
@@ -215,11 +305,10 @@ export default function InterviewSimulator() {
               </Col>
               
               <Col xs={24} lg={11}>
-                {/* Visual placeholder for original design */}
                 <div style={{ background: 'rgba(0,0,0,0.4)', borderRadius: '24px', border: '1px solid rgba(0,242,255,0.2)', padding: '30px', minHeight: '300px', display: 'flex', flexDirection: 'column', gap: '24px', justifyContent: 'center', alignItems: 'center' }}>
                     <RobotOutlined style={{ fontSize: '48px', color: '#00f2ff' }} />
                     <Text style={{ color: '#fff', fontSize: '18px' }}>AI Mock Interview Simulator</Text>
-                    <Text style={{ color: 'rgba(255,255,255,0.5)', textAlign: 'center' }}>Powered by RAJ.pdf RAG Integration</Text>
+                    <Text style={{ color: 'rgba(255,255,255,0.5)', textAlign: 'center' }}>Supports Cybersecurity, AIML, Data Science & More</Text>
                 </div>
               </Col>
             </Row>
