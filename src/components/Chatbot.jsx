@@ -244,13 +244,13 @@ export default function Chatbot({ problemData, userName, isFullPage = false }) {
       </div>
 
       {/* Quick Options */}
-      <div style={{ padding: '8px 12px', background: theme === 'dark' ? '#1a1a1a' : '#fff' }}>
-         <Row gutter={[8, 8]}>
-            <Col><Button size="small" onClick={() => handleSend("Step-by-step approach")}>Step-by-step approach</Button></Col>
-            <Col><Button size="small" onClick={() => handleSend("What are all algorithms that can be applied?")}>All algorithms</Button></Col>
-            <Col><Button size="small" onClick={() => handleSend("What are all the ways in which the code can be done?")}>Ways to code</Button></Col>
+      <div style={{ padding: '8px 12px', background: theme === 'dark' ? '#14141d' : '#f8f9fa', borderTop: `1px solid ${theme === 'dark' ? '#27273a' : '#e5e7eb'}` }}>
+         <Row gutter={[6, 6]}>
+            <Col><Button size="small" style={{ background: '#1f2937', color: '#f9fafb', borderColor: '#374151' }} onClick={() => handleSend("Step-by-step approach")}>Step-by-step approach</Button></Col>
+            <Col><Button size="small" style={{ background: '#1f2937', color: '#f9fafb', borderColor: '#374151' }} onClick={() => handleSend("What are all algorithms that can be applied?")}>All algorithms</Button></Col>
+            <Col><Button size="small" style={{ background: '#1f2937', color: '#f9fafb', borderColor: '#374151' }} onClick={() => handleSend("What are all the ways in which the code can be done?")}>Ways to code</Button></Col>
             <Col>
-              <Button size="small" disabled={hintsRemaining <= 0} onClick={() => handleSend("Hint")}>
+              <Button size="small" style={{ background: '#1e3a8a', color: '#93c5fd', borderColor: '#3b82f6' }} disabled={hintsRemaining <= 0} onClick={() => handleSend("Hint")}>
                 Hint ({hintsRemaining})
               </Button>
             </Col>
