@@ -7,7 +7,6 @@ import { Prism as SyntaxHighlighter } from 'react-syntax-highlighter';
 import { vscDarkPlus } from 'react-syntax-highlighter/dist/esm/styles/prism';
 
 import { useTheme } from '../context/ThemeContext';
-
 import Logo from './Logo';
 
 const { Text } = Typography;
@@ -16,8 +15,11 @@ export default function Chatbot({ problemData, userName, isFullPage = false }) {
   const [messages, setMessages] = useState([]);
   const [inputValue, setInputValue] = useState('');
   const [isTyping, setIsTyping] = useState(false);
+  const [hintsRemaining, setHintsRemaining] = useState(3);
   const { theme } = useTheme();
   const messagesEndRef = useRef(null);
+
+  const API_KEY = import.meta.env.VITE_GROQ_API_KEY;
 
   // Initialize messages when problem changes
   useEffect(() => {
@@ -29,6 +31,7 @@ export default function Chatbot({ problemData, userName, isFullPage = false }) {
           text: `Welcome, ${userName}! Ready to work with your **JARVIS** assistant? I see we are working on **${problemData.title}**. What part of the problem are you analyzing first?`
         }
       ]);
+      setHintsRemaining(3);
     }
   }, [problemData, userName]);
 
@@ -41,47 +44,80 @@ export default function Chatbot({ problemData, userName, isFullPage = false }) {
     navigator.clipboard.writeText(text);
   };
 
-  const handleSend = () => {
-    if (!inputValue.trim()) return;
+  const callGroqAPI = async (userText, systemContext) => {
+    if (!API_KEY) {
+      return "API Key is missing. Please check your .env file.";
+    }
+    
+    try {
+      const response = await fetch('https://api.groq.com/openai/v1/chat/completions', {
+        method: 'POST',
+        headers: {
+          'Authorization': `Bearer ${API_KEY}`,
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({
+          model: 'llama3-8b-8192',
+          messages: [
+            { role: 'system', content: systemContext },
+            ...messages.map(m => ({ role: m.sender === 'bot' ? 'assistant' : 'user', content: m.text })),
+            { role: 'user', content: userText }
+          ],
+          temperature: 0.7,
+          max_tokens: 1024
+        })
+      });
 
-    const newUserMsg = { id: Date.now(), sender: 'user', text: inputValue };
+      const data = await response.json();
+      if (data.choices && data.choices.length > 0) {
+        return data.choices[0].message.content;
+      }
+      return "Sorry, I couldn't process that response.";
+    } catch (error) {
+      console.error(error);
+      return "Network error occurred while calling the AI API.";
+    }
+  };
+
+  const handleSend = async (overrideText = null) => {
+    let textToSend = overrideText || inputValue;
+    if (!textToSend.trim()) return;
+
+    // Handle hint tracking
+    if (textToSend === "Hint") {
+      if (hintsRemaining > 0) {
+        setHintsRemaining(prev => prev - 1);
+        textToSend = `Please give me a hint for the problem. I have ${hintsRemaining - 1} hints left after this. Keep it short.`;
+      } else {
+        setMessages(prev => [...prev, { id: Date.now(), sender: 'user', text: "Hint" }, { id: Date.now() + 1, sender: 'bot', text: "You have used all 3 hints! If you are still stuck, you can ask for the full solution." }]);
+        return;
+      }
+    }
+
+    const newUserMsg = { id: Date.now(), sender: 'user', text: overrideText === "Hint" ? "Hint" : textToSend };
     setMessages(prev => [...prev, newUserMsg]);
-    setInputValue('');
+    if (!overrideText) setInputValue('');
     setIsTyping(true);
 
-    // Simulate logic for context-aware responses
-    setTimeout(() => {
-      setIsTyping(false);
+    const systemPrompt = `You are JARVIS, an expert AI coding assistant. The user is currently solving a coding problem titled "${problemData?.title}". 
+    The problem description involves: ${problemData?.description?.substring(0, 300)}...
+    The topics are: ${problemData?.topics?.join(', ') || 'General'}.
+    If they ask for a step-by-step approach, provide a numbered list.
+    If they ask for ways to code, list different approaches (e.g., brute force vs optimal).
+    If they ask for the full solution, provide the complete optimal code.
+    Keep responses encouraging, concise, and formatted in markdown.`;
 
-      let response = "";
-      const lowerInput = inputValue.toLowerCase();
-      const topics = problemData?.topics || [];
+    const botResponseText = await callGroqAPI(textToSend, systemPrompt);
 
-      if (lowerInput.includes('hint')) {
-        if (topics.includes('Two Pointers')) {
-          response = `Since this problem involves **Two Pointers**, try initializing one at the start and one at the end of the array. How do they move relative to each other based on the target?`;
-        } else if (topics.includes('Hash Table')) {
-          response = `A **Hash Table** could help you store values we've already seen to achieve O(n) time complexity. What would be the key and value in your map?`;
-        } else if (topics.includes('Stack')) {
-          response = `Think about using a **Stack** to keep track of open brackets. What should you do when you encounter a closing bracket?`;
-        } else {
-          response = `For **${problemData.title}**, focus on the core requirement. Have you considered the edge cases like empty inputs or single elements?`;
-        }
-      } else if (lowerInput.includes('complexity')) {
-        response = `Most optimal solutions for this type of problem aim for **O(n)** or **O(n log n)**. Can you think of a way to avoid a nested loop?`;
-      } else {
-        response = `That's an interesting approach! In the context of **${problemData.title}**, how does that handle the constraints mentioned in the description? \n\nWould you like a specific hint on the algorithm?`;
+    setIsTyping(false);
+    setMessages(prev => [
+      ...prev,
+      {
+        id: Date.now() + 1,
+        sender: 'bot',
+        text: botResponseText
       }
-
-      setMessages(prev => [
-        ...prev,
-        {
-          id: Date.now() + 1,
-          sender: 'bot',
-          text: response
-        }
-      ]);
-    }, 1200);
+    ]);
   };
 
   const MarkdownRenderer = ({ content }) => (
@@ -142,7 +178,14 @@ export default function Chatbot({ problemData, userName, isFullPage = false }) {
           </div>
         </Space>
         <Tooltip title="Reset chat">
-          <Button type="text" icon={<SettingOutlined />} size="small" />
+          <Button type="text" icon={<SettingOutlined />} size="small" onClick={() => {
+            setMessages([{
+              id: Date.now(),
+              sender: 'bot',
+              text: `Welcome back! Ready to work on **${problemData.title}**?`
+            }]);
+            setHintsRemaining(3);
+          }} />
         </Tooltip>
       </div>
 
@@ -184,22 +227,11 @@ export default function Chatbot({ problemData, userName, isFullPage = false }) {
                       <MarkdownRenderer content={msg.text} />
                     )}
                   </div>
-                  {msg.sender === 'bot' && (
-                    <div style={{ marginTop: '4px', marginLeft: '4px' }}>
-                      <Space size="middle">
-                        <Tooltip title="Good response"><LikeOutlined style={{ color: '#8c8c8c', cursor: 'pointer' }} /></Tooltip>
-                        <Tooltip title="Poor response"><DislikeOutlined style={{ color: '#8c8c8c', cursor: 'pointer' }} /></Tooltip>
-                        <Tooltip title="Copy"><CopyOutlined style={{ color: '#8c8c8c', cursor: 'pointer' }} onClick={() => copyToClipboard(msg.text)} /></Tooltip>
-                      </Space>
-                    </div>
-                  )}
                 </div>
               </div>
             </List.Item>
           )}
         />
-
-        {/* Typing Indicator */}
         {isTyping && (
           <div style={{ display: 'flex', alignItems: 'flex-start', marginTop: '12px' }}>
             <Logo size={24} style={{ marginRight: '8px' }} />
@@ -211,6 +243,23 @@ export default function Chatbot({ problemData, userName, isFullPage = false }) {
           </div>
         )}
         <div ref={messagesEndRef} />
+      </div>
+
+      {/* Quick Options */}
+      <div style={{ padding: '8px 12px', background: theme === 'dark' ? '#1a1a1a' : '#fff' }}>
+         <Row gutter={[8, 8]}>
+            <Col><Button size="small" onClick={() => handleSend("Step-by-step approach")}>Step-by-step approach</Button></Col>
+            <Col><Button size="small" onClick={() => handleSend("What are all algorithms that can be applied?")}>All algorithms</Button></Col>
+            <Col><Button size="small" onClick={() => handleSend("What are all the ways in which the code can be done?")}>Ways to code</Button></Col>
+            <Col>
+              <Button size="small" disabled={hintsRemaining <= 0} onClick={() => handleSend("Hint")}>
+                Hint ({hintsRemaining})
+              </Button>
+            </Col>
+            <Col>
+              <Button size="small" type="primary" danger onClick={() => handleSend("Show full solution")}>Full Solution</Button>
+            </Col>
+         </Row>
       </div>
 
       {/* Chat Input Box */}
@@ -226,14 +275,14 @@ export default function Chatbot({ problemData, userName, isFullPage = false }) {
               handleSend();
             }
           }}
-          style={{ borderRadius: '6px', marginBottom: '8px', background: theme === 'dark' ? '#0f0f0f' : '#fff' }}
+          style={{ borderRadius: '6px', marginBottom: '8px', background: theme === 'dark' ? '#0f0f0f' : '#fff', color: theme === 'dark' ? '#fff' : '#000' }}
         />
         <Row justify="space-between" align="middle">
           <Col>
             <Text type="secondary" style={{ fontSize: '11px' }}>Shift + Enter for new line</Text>
           </Col>
           <Col>
-            <Button type="primary" icon={<SendOutlined />} onClick={handleSend} disabled={!inputValue.trim()}>
+            <Button type="primary" icon={<SendOutlined />} onClick={() => handleSend()} disabled={!inputValue.trim()}>
               Send
             </Button>
           </Col>
