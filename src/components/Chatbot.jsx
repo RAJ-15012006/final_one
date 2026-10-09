@@ -55,7 +55,7 @@ export default function Chatbot({ problemData, userName, isFullPage = false }) {
           'Content-Type': 'application/json'
         },
         body: JSON.stringify({
-          model: 'llama3-8b-8192',
+          model: 'openai/gpt-oss-20b',
           messages: [
             { role: 'system', content: systemContext },
             ...messages.map(m => ({ role: m.sender === 'bot' ? 'assistant' : 'user', content: m.text })),
