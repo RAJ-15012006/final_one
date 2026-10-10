@@ -1,6 +1,10 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { Typography, Row, Col, Space, Button, Input, List, Avatar, Tooltip, notification, Modal } from 'antd';
-import { ThunderboltOutlined, MessageOutlined, BulbOutlined, LineChartOutlined, StarOutlined, RobotOutlined, ArrowRightOutlined, UserOutlined, SendOutlined, WarningOutlined, LockOutlined, CreditCardOutlined } from '@ant-design/icons';
+import { 
+  ThunderboltOutlined, MessageOutlined, BulbOutlined, LineChartOutlined, 
+  StarOutlined, RobotOutlined, ArrowRightOutlined, UserOutlined, SendOutlined, 
+  WarningOutlined, LockOutlined, CreditCardOutlined, VideoCameraOutlined, AudioOutlined 
+} from '@ant-design/icons';
 import ReactMarkdown from 'react-markdown';
 import remarkGfm from 'remark-gfm';
 import { useNavigate } from 'react-router-dom';
@@ -20,6 +24,9 @@ export default function InterviewSimulator() {
   const [warnings, setWarnings] = useState(0);
   const [showPaywall, setShowPaywall] = useState(false);
   const [interviewCount, setInterviewCount] = useState(0);
+  const [mediaStream, setMediaStream] = useState(null);
+  const [micActive, setMicActive] = useState(false);
+  const videoRef = useRef(null);
   const messagesEndRef = useRef(null);
   const navigate = useNavigate();
   const { user } = useAuth();
@@ -86,14 +93,38 @@ export default function InterviewSimulator() {
     }
   }, [isStarted, navigate]);
 
+  // Attach live video stream to video tag whenever stream changes and simulator is active
+  useEffect(() => {
+    if (mediaStream && videoRef.current) {
+      videoRef.current.srcObject = mediaStream;
+    }
+  }, [mediaStream, isStarted]);
+
+  // Clean up media tracks when leaving the component
+  useEffect(() => {
+    return () => {
+      if (mediaStream) {
+        mediaStream.getTracks().forEach(track => track.stop());
+      }
+    };
+  }, [mediaStream]);
+
   const requestPermissions = async () => {
     try {
-      await navigator.mediaDevices.getUserMedia({ video: true, audio: true });
-      notification.success({ message: 'Proctoring Active', description: 'Camera and microphone access granted.' });
-      return true;
+      const stream = await navigator.mediaDevices.getUserMedia({ video: true, audio: true });
+      setMediaStream(stream);
+      setMicActive(stream.getAudioTracks().length > 0);
+      notification.success({ 
+        message: 'Proctoring Active', 
+        description: 'Camera and microphone connected successfully.' 
+      });
+      return stream;
     } catch (err) {
-      notification.error({ message: 'Permission Denied', description: 'You must allow camera and microphone access to start the interview.' });
-      return false;
+      notification.error({ 
+        message: 'Camera / Mic Access Required', 
+        description: 'Please grant camera and microphone permissions in your browser to proceed with the mock interview.' 
+      });
+      return null;
     }
   };
 
@@ -104,8 +135,8 @@ export default function InterviewSimulator() {
       return;
     }
 
-    const granted = await requestPermissions();
-    if (!granted) return;
+    const stream = await requestPermissions();
+    if (!stream) return;
 
     // Increment interview count in localStorage
     const key = `interview_count_${user?.id || 'guest'}`;
@@ -201,17 +232,70 @@ export default function InterviewSimulator() {
 
   const renderSimulator = () => (
     <div style={{ flex: 1, display: 'flex', flexDirection: 'column', height: 'calc(100vh - 120px)', background: '#0a0a0f', borderRadius: '16px', overflow: 'hidden', border: '1px solid rgba(0, 242, 255, 0.2)' }}>
-      {/* Header */}
-      <div style={{ padding: '16px 24px', background: 'rgba(255,255,255,0.05)', borderBottom: '1px solid rgba(255,255,255,0.1)', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-        <Space>
+      {/* Header with Camera and Mic Indicators */}
+      <div style={{ padding: '12px 24px', background: 'rgba(255,255,255,0.05)', borderBottom: '1px solid rgba(255,255,255,0.1)', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+        <Space size="middle">
           <RobotOutlined style={{ color: '#00f2ff', fontSize: '24px' }} />
-          <Title level={4} style={{ margin: 0, color: '#fff' }}>Proctored Interview Simulator</Title>
-        </Space>
-        {activeDomain && (
-          <div style={{ background: 'rgba(0, 242, 255, 0.1)', padding: '4px 12px', borderRadius: '4px', border: '1px solid rgba(0,242,255,0.3)' }}>
-            <Text style={{ color: '#00f2ff', fontSize: '12px' }}>Domain: {activeDomain}</Text>
+          <div>
+            <Title level={4} style={{ margin: 0, color: '#fff' }}>Proctored Interview Simulator</Title>
+            <Space size="small" style={{ marginTop: '2px' }}>
+              <span style={{ display: 'inline-flex', alignItems: 'center', gap: '4px', fontSize: '11px', color: '#39ff14' }}>
+                <VideoCameraOutlined /> Camera Active
+              </span>
+              <span style={{ color: 'rgba(255,255,255,0.3)' }}>•</span>
+              <span style={{ display: 'inline-flex', alignItems: 'center', gap: '4px', fontSize: '11px', color: micActive ? '#00f2ff' : '#ff4d4f' }}>
+                <AudioOutlined /> {micActive ? 'Mic Active' : 'Mic Muted'}
+              </span>
+            </Space>
           </div>
-        )}
+        </Space>
+
+        <Space size="middle">
+          {activeDomain && (
+            <div style={{ background: 'rgba(0, 242, 255, 0.1)', padding: '4px 12px', borderRadius: '4px', border: '1px solid rgba(0,242,255,0.3)' }}>
+              <Text style={{ color: '#00f2ff', fontSize: '12px' }}>Domain: {activeDomain}</Text>
+            </div>
+          )}
+
+          {/* Live Proctoring Webcam Feed */}
+          <div style={{
+            position: 'relative',
+            width: '120px',
+            height: '80px',
+            borderRadius: '10px',
+            overflow: 'hidden',
+            border: '2px solid #39ff14',
+            boxShadow: '0 0 12px rgba(57, 255, 20, 0.4)',
+            background: '#000'
+          }}>
+            <video
+              ref={videoRef}
+              autoPlay
+              playsInline
+              muted
+              style={{
+                width: '100%',
+                height: '100%',
+                objectFit: 'cover',
+                transform: 'scaleX(-1)' // Mirror view
+              }}
+            />
+            <div style={{
+              position: 'absolute',
+              top: '4px',
+              left: '6px',
+              display: 'flex',
+              alignItems: 'center',
+              gap: '4px',
+              background: 'rgba(0,0,0,0.7)',
+              padding: '2px 5px',
+              borderRadius: '4px'
+            }}>
+              <span style={{ width: '6px', height: '6px', borderRadius: '50%', background: '#ff4d4f', animation: 'pulse 1.5s infinite' }} />
+              <span style={{ color: '#fff', fontSize: '9px', fontWeight: 'bold' }}>REC</span>
+            </div>
+          </div>
+        </Space>
       </div>
 
       {/* Chat Area */}
